@@ -113,9 +113,9 @@ export default function SummaryModule() {
       )}
 
       {selectedSummary && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <Card className="w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] flex flex-col border-none shadow-2xl rounded-[1.5rem] md:rounded-[2rem] my-auto">
-            <CardHeader className="flex flex-row items-center justify-between border-b px-4 md:px-8 py-4 md:py-6 shrink-0">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md md:p-4">
+          <Card className="w-full h-full md:h-auto md:max-w-4xl md:max-h-[90vh] flex flex-col border-none shadow-2xl md:rounded-[2rem] bg-background">
+            <CardHeader className="flex flex-row items-center justify-between border-b px-4 md:px-8 py-3 md:py-6 shrink-0 bg-card/50">
               <div>
                 <CardTitle className="text-2xl font-black">{selectedSummary.title}</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">Source: {selectedSummary.documents?.title}</p>
@@ -129,14 +129,15 @@ export default function SummaryModule() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="flex-1 overflow-hidden p-0">
-              <ScrollArea className="h-full px-4 md:px-8 py-4 md:py-6">
-                <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed text-base prose-headings:font-black prose-p:text-muted-foreground prose-strong:text-foreground">
+            <CardContent className="flex-1 overflow-auto p-0">
+              <div className="h-full px-5 md:px-12 py-6 md:py-10">
+                <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none leading-relaxed text-base prose-headings:font-black prose-p:text-muted-foreground prose-strong:text-foreground">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {selectedSummary.content}
                   </ReactMarkdown>
                 </div>
-              </ScrollArea>
+                <div className="h-20" />
+              </div>
             </CardContent>
           </Card>
         </div>

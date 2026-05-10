@@ -17,6 +17,7 @@ export default function ExamMode() {
   const [answers, setAnswers] = useState<Record<number, number>>({})
   const [timeLeft, setTimeLeft] = useState(customTime * 60)
   const [isFinished, setIsFinished] = useState(false)
+  const [isReviewing, setIsReviewing] = useState(false)
   const [score, setScore] = useState(0)
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -90,9 +91,18 @@ export default function ExamMode() {
             </div>
           </div>
 
-          <Button onClick={() => navigate('/dashboard/mock-exams')} size="lg" className="h-16 px-12 rounded-2xl text-xl font-bold">
-            Back to Dashboard
-          </Button>
+           <div className="flex flex-col md:flex-row justify-center gap-4">
+              <Button onClick={() => navigate('/dashboard/mock-exams')} size="lg" className="h-16 px-8 rounded-2xl text-xl font-bold w-full md:w-auto">
+                Back to Dashboard
+              </Button>
+              <Button onClick={() => {
+                setIsReviewing(true)
+                setIsFinished(false)
+                setCurrentQuestion(0)
+              }} variant="outline" size="lg" className="h-16 px-8 rounded-2xl text-xl font-bold w-full md:w-auto">
+                Review Answers
+              </Button>
+           </div>
         </Card>
       </div>
     )
@@ -111,14 +121,20 @@ export default function ExamMode() {
           </div>
         </div>
         
-        <div className="flex items-center gap-6">
-          <div className={`flex items-center gap-2 px-6 py-2 rounded-full font-mono text-xl font-black ${timeLeft < 300 ? 'bg-destructive/10 text-destructive animate-pulse' : 'bg-muted'}`}>
-            <Timer size={20} />
-            {formatTime(timeLeft)}
+        <div className="flex items-center gap-2 md:gap-6">
+          <div className={`flex items-center gap-1 md:gap-2 px-3 md:px-6 py-1.5 md:py-2 rounded-full font-mono text-sm md:text-xl font-black ${timeLeft < 300 && !isReviewing ? 'bg-destructive/10 text-destructive animate-pulse' : 'bg-muted'}`}>
+            <Timer size={18} className="shrink-0" />
+            {isReviewing ? "REVIEW" : formatTime(timeLeft)}
           </div>
-          <Button variant="destructive" onClick={handleSubmit} className="rounded-xl font-bold px-6 h-11 shadow-lg shadow-destructive/20">
-            Finish Exam
-          </Button>
+          {!isReviewing ? (
+            <Button variant="destructive" size="sm" onClick={handleSubmit} className="rounded-xl font-bold px-4 md:px-6 h-9 md:h-11 shadow-lg shadow-destructive/20 text-xs md:text-base">
+              Finish
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" onClick={() => setIsFinished(true)} className="rounded-xl font-bold">
+              Done
+            </Button>
+          )}
         </div>
       </header>
 
@@ -146,35 +162,48 @@ export default function ExamMode() {
             {exam.questions[currentQuestion].question}
           </h2>
           
-          <div className="grid grid-cols-1 gap-5">
-            {exam.questions[currentQuestion].options.map((option: string, i: number) => (
-              <button 
-                key={i}
-                onClick={() => setAnswers({...answers, [currentQuestion]: i})}
-                className={`flex items-center gap-6 p-6 rounded-2xl border-2 text-left transition-all group ${
-                  answers[currentQuestion] === i ? 'border-primary bg-primary/5 ring-4 ring-primary/5' : 'border-muted hover:border-primary/50'
-                }`}
-              >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-black transition-colors ${
-                  answers[currentQuestion] === i ? 'bg-primary text-primary-foreground' : 'bg-muted group-hover:bg-primary/10 text-muted-foreground group-hover:text-primary'
-                }`}>
-                  {String.fromCharCode(65 + i)}
-                </div>
-                <span className="text-lg font-medium flex-1">{option}</span>
-                {answers[currentQuestion] === i && <CheckCircle2 size={24} className="text-primary" />}
-              </button>
-            ))}
+          <div className="grid grid-cols-1 gap-4 md:gap-5">
+            {exam.questions[currentQuestion].options.map((option: string, i: number) => {
+              const isCorrect = i === exam.questions[currentQuestion].correct
+              const isSelected = answers[currentQuestion] === i
+              
+              return (
+                <button 
+                  key={i}
+                  disabled={isReviewing}
+                  onClick={() => !isReviewing && setAnswers({...answers, [currentQuestion]: i})}
+                  className={`flex items-center gap-4 md:gap-6 p-4 md:p-6 rounded-2xl border-2 text-left transition-all group ${
+                    isReviewing 
+                      ? isCorrect 
+                        ? 'border-green-500 bg-green-500/10' 
+                        : isSelected ? 'border-red-500 bg-red-500/10' : 'border-muted'
+                      : isSelected 
+                        ? 'border-primary bg-primary/5 ring-4 ring-primary/5' 
+                        : 'border-muted hover:border-primary/50'
+                  }`}
+                >
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shrink-0 font-black transition-colors ${
+                    isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted group-hover:bg-primary/10 text-muted-foreground group-hover:text-primary'
+                  } ${isReviewing && isCorrect ? 'bg-green-500 text-white' : ''}`}>
+                    {String.fromCharCode(65 + i)}
+                  </div>
+                  <span className="text-base md:text-lg font-medium flex-1">{option}</span>
+                  {isSelected && !isReviewing && <CheckCircle2 size={24} className="text-primary" />}
+                  {isReviewing && isCorrect && <CheckCircle2 size={24} className="text-green-500" />}
+                </button>
+              )
+            })}
           </div>
         </Card>
 
-        <div className="fixed bottom-0 left-0 w-full p-8 flex justify-center pointer-events-none">
-           <div className="max-w-5xl w-full flex justify-between pointer-events-auto">
+        <div className="fixed bottom-0 left-0 w-full p-4 md:p-8 flex justify-center pointer-events-none">
+           <div className="max-w-5xl w-full flex justify-between pointer-events-auto gap-4">
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="lg" 
                 disabled={currentQuestion === 0}
                 onClick={() => setCurrentQuestion(q => q - 1)}
-                className="h-16 px-10 rounded-2xl text-lg font-bold gap-2"
+                className="h-12 md:h-16 px-6 md:px-10 rounded-xl md:rounded-2xl text-base md:text-lg font-bold gap-2 bg-background/80 backdrop-blur-md"
               >
                 Previous
               </Button>
@@ -183,13 +212,15 @@ export default function ExamMode() {
                 onClick={() => {
                   if (currentQuestion + 1 < exam.questions.length) {
                     setCurrentQuestion(q => q + 1)
-                  } else {
+                  } else if (!isReviewing) {
                     handleSubmit()
+                  } else {
+                    setIsFinished(true)
                   }
                 }}
-                className="h-16 px-10 rounded-2xl text-lg font-bold gap-2 shadow-2xl shadow-primary/20"
+                className="h-12 md:h-16 px-6 md:px-10 rounded-xl md:rounded-2xl text-base md:text-lg font-bold gap-2 shadow-2xl shadow-primary/20"
               >
-                {currentQuestion + 1 === exam.questions.length ? 'Submit Exam' : 'Next Question'}
+                {currentQuestion + 1 === exam.questions.length ? (isReviewing ? 'Finish Review' : 'Submit') : 'Next'}
                 <ChevronRight size={24} />
               </Button>
            </div>
