@@ -73,6 +73,11 @@ export default function DashboardOverview() {
       .eq('id', user.id)
       .single()
 
+    const { count: notesCount } = await supabase
+      .from('notes')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+
     const { data: recentDocs } = await supabase
       .from('documents')
       .select('*')
@@ -89,6 +94,8 @@ export default function DashboardOverview() {
     setActivities(recentDocs || [])
   }
 
+  const navigate = useNavigate()
+
   return (
     <div className="space-y-8 pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -97,11 +104,11 @@ export default function DashboardOverview() {
           <p className="text-muted-foreground">Welcome back! Here's your study progress for this week.</p>
         </div>
         <div className="flex items-center gap-3">
-           <Button variant="outline" className="gap-2">
+           <Button onClick={() => navigate('/dashboard/mock-exams')} variant="outline" className="gap-2 rounded-xl">
              <Clock size={16} />
              Session History
            </Button>
-           <Button className="gap-2">
+           <Button onClick={() => navigate('/dashboard/upload')} className="gap-2 rounded-xl shadow-lg shadow-primary/20">
              <Zap size={16} />
              Start Quick Study
            </Button>
@@ -220,7 +227,7 @@ export default function DashboardOverview() {
                 <Progress value={Math.min((stats.streak / 30) * 100, 100)} className="h-2" />
              </div>
              
-             <Button className="w-full mt-4 border group" variant="outline">
+             <Button onClick={() => navigate('/dashboard/leaderboard')} className="w-full mt-4 border group rounded-xl" variant="outline">
                 View All Achievements
                 <ChevronRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
              </Button>
