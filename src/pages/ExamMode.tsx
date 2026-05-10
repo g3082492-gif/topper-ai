@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
 import { useAuth } from "../hooks/useAuth"
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.tsx"
+import { Card } from "../components/ui/card.tsx"
 import { Button } from "../components/ui/button.tsx"
 import { Timer, AlertCircle, CheckCircle2, ChevronRight, GraduationCap } from "lucide-react"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { useToast } from "../hooks/use-toast.ts"
 
 export default function ExamMode() {
@@ -19,7 +19,6 @@ export default function ExamMode() {
   const [timeLeft, setTimeLeft] = useState(customTime * 60)
   const [isFinished, setIsFinished] = useState(false)
   const [score, setScore] = useState(0)
-  const { user } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
 
