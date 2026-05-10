@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
-import { useAuth } from "../hooks/useAuth"
 import { Card } from "../components/ui/card.tsx"
 import { Button } from "../components/ui/button.tsx"
 import { Timer, AlertCircle, CheckCircle2, ChevronRight, GraduationCap } from "lucide-react"
