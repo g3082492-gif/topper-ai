@@ -1,8 +1,9 @@
 import * as pdfjs from 'pdfjs-dist'
+import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url"
 import mammoth from 'mammoth'
 
-// Set worker path for pdf.js
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs`
+// Set worker path for pdf.js using Vite's native worker loader
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker
 
 export const processFile = async (file: File): Promise<string> => {
   const fileType = file.name.split('.').pop()?.toLowerCase()
