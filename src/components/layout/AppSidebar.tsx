@@ -12,7 +12,8 @@ import {
   LogOut,
   ClipboardCheck,
   Trophy,
-  Plus
+  Plus,
+  X
 } from "lucide-react"
 import {
   Sidebar,
@@ -24,6 +25,7 @@ import {
   SidebarMenuItem,
   SidebarGroup,
   SidebarGroupLabel,
+  useSidebar
 } from "../ui/sidebar.tsx"
 import { Link, useLocation } from "react-router-dom"
 import { useAuth } from "../../hooks/useAuth"
@@ -45,6 +47,7 @@ const menuItems = [
 export function AppSidebar() {
   const location = useLocation()
   const { signOut, user } = useAuth()
+  const { setOpenMobile, isMobile } = useSidebar()
   const [recentDocs, setRecentDocs] = React.useState<any[]>([])
 
   React.useEffect(() => {
@@ -67,13 +70,20 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4 border-b">
-        <Link to="/dashboard" className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-            <GraduationCap size={22} />
-          </div>
-          <span className="font-black text-xl tracking-tight">Topper AI</span>
-        </Link>
-        <Link to="/dashboard/upload">
+        <div className="flex items-center justify-between mb-4">
+          <Link to="/dashboard" className="flex items-center gap-3" onClick={() => setOpenMobile(false)}>
+            <div className="p-2 rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+              <GraduationCap size={22} />
+            </div>
+            <span className="font-black text-xl tracking-tight">Topper AI</span>
+          </Link>
+          {isMobile && (
+            <Button variant="ghost" size="icon" onClick={() => setOpenMobile(false)} className="rounded-full h-8 w-8">
+              <X size={20} />
+            </Button>
+          )}
+        </div>
+        <Link to="/dashboard/upload" onClick={() => setOpenMobile(false)}>
           <Button className="w-full justify-start gap-2 h-11 rounded-xl shadow-sm border-none bg-primary/10 text-primary hover:bg-primary/20" variant="secondary">
             <Plus size={18} />
             <span className="font-bold">New Study</span>
@@ -92,6 +102,7 @@ export function AppSidebar() {
                   isActive={location.pathname === item.url}
                   tooltip={item.title}
                   className="h-11 rounded-xl data-[active=true]:bg-primary/10 data-[active=true]:text-primary transition-all px-3"
+                  onClick={() => setOpenMobile(false)}
                 >
                   <Link to={item.url} className="gap-3">
                     <item.icon size={20} className={location.pathname === item.url ? "text-primary" : "text-muted-foreground"} />
@@ -109,7 +120,7 @@ export function AppSidebar() {
             {recentDocs.length > 0 ? (
               recentDocs.map((doc) => (
                 <SidebarMenuItem key={doc.id}>
-                  <SidebarMenuButton asChild className="h-9 rounded-lg text-xs">
+                  <SidebarMenuButton asChild className="h-9 rounded-lg text-xs" onClick={() => setOpenMobile(false)}>
                     <Link to="/dashboard/notes" className="truncate">
                       <FileText size={14} className="text-muted-foreground shrink-0" />
                       <span className="truncate">{doc.title}</span>
@@ -127,7 +138,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Profile">
+              <SidebarMenuButton asChild tooltip="Profile" onClick={() => setOpenMobile(false)}>
                 <Link to="/dashboard/profile">
                   <User size={20} />
                   <span>Profile</span>
@@ -135,7 +146,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Settings">
+              <SidebarMenuButton asChild tooltip="Settings" onClick={() => setOpenMobile(false)}>
                 <Link to="/dashboard/settings">
                   <Settings size={20} />
                   <span>Settings</span>
