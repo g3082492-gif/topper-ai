@@ -80,7 +80,11 @@ export default function UploadCenter() {
       let title = "URL Content"
       
       if (activeTab === 'file' && file) {
+        setStatus("Reading file content...")
         text = await processFile(file)
+        if (!text || text.trim().length < 50) {
+          throw new Error("Could not extract enough text from the file. Please ensure it contains readable text (not just images).")
+        }
         title = file.name
       } else if (activeTab === 'text' && pastedText) {
         text = pastedText
@@ -145,6 +149,10 @@ export default function UploadCenter() {
           console.error("Link extraction failed:", e)
           throw new Error(e.message || "Failed to extract content from the URL.")
         }
+      }
+
+      if (!text || text.trim().length < 50) {
+        throw new Error("No readable content found. Please check your file, link, or pasted text. (Scanned PDFs are not supported)")
       }
 
       if (user) {
