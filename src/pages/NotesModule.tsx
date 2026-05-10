@@ -183,17 +183,22 @@ export default function NotesModule() {
       {selectedNote && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md md:p-4">
           <Card className="w-full h-full md:h-auto md:max-w-4xl md:max-h-[90vh] flex flex-col border-none shadow-2xl md:rounded-[2rem] bg-background">
-            <CardHeader className="flex flex-row items-center justify-between border-b px-4 md:px-8 py-3 md:py-6 shrink-0 bg-card/50">
-              <div>
-                <CardTitle className="text-2xl font-black">{selectedNote.title}</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">Source: {selectedNote.documents?.title || 'Manual Entry'}</p>
+            <CardHeader className="flex flex-row items-center justify-between border-b px-4 md:px-8 py-2 md:py-4 shrink-0 bg-card/50 relative">
+              <div className="max-w-[70%]">
+                <CardTitle className="text-lg md:text-2xl font-black line-clamp-1">{selectedNote.title}</CardTitle>
+                <p className="text-[10px] md:text-sm text-muted-foreground mt-0.5 line-clamp-1">Source: {selectedNote.documents?.title || 'Manual Entry'}</p>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" className="gap-2" onClick={(e) => downloadPDF(e, selectedNote)}>
-                  <Download size={16} /> Download PDF
+              <div className="flex items-center gap-1 md:gap-2">
+                <Button variant="ghost" size="icon" onClick={(e) => downloadPDF(e, selectedNote)} className="h-9 w-9 rounded-full">
+                  <Download size={18} />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => setSelectedNote(null)} className="rounded-full">
-                  <X size={24} />
+                <Button 
+                  variant="secondary" 
+                  size="icon" 
+                  onClick={() => setSelectedNote(null)} 
+                  className="h-9 w-9 rounded-full shadow-md md:shadow-none"
+                >
+                  <X size={20} />
                 </Button>
               </div>
             </CardHeader>

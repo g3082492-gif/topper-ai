@@ -147,10 +147,10 @@ export default function QuizModule() {
                      <span>Question {currentQuestion + 1} of {currentQuiz.questions.length}</span>
                   </div>
                </div>
-               <Button variant="ghost" size="sm" onClick={() => {
+               <Button variant="secondary" size="sm" onClick={() => {
                  setCurrentQuiz(null)
                  setIsReviewing(false)
-               }} className="rounded-xl">Exit</Button>
+               }} className="rounded-full px-4 font-bold shadow-sm">Exit</Button>
             </div>
 
            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">

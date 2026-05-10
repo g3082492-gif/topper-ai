@@ -131,7 +131,7 @@ export default function ExamMode() {
               Finish
             </Button>
           ) : (
-            <Button variant="ghost" size="sm" onClick={() => setIsFinished(true)} className="rounded-xl font-bold">
+            <Button variant="secondary" size="sm" onClick={() => setIsFinished(true)} className="rounded-full px-4 font-bold shadow-sm">
               Done
             </Button>
           )}
