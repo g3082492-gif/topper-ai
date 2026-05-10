@@ -7,13 +7,15 @@ import {
   Zap,
   Type,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  Sparkles
 } from "lucide-react"
 import { Button } from "../components/ui/button.tsx"
 import { Card, CardContent } from "../components/ui/card.tsx"
 import { Input } from "../components/ui/input.tsx"
 import { Label } from "../components/ui/label.tsx"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs.tsx"
+import { useSidebar } from "../components/ui/sidebar.tsx"
 import { processFile } from "../services/fileService"
 import { generateAIResponse } from "../services/aiService"
 import { useToast } from "../hooks/use-toast.ts"
@@ -36,6 +38,7 @@ export default function UploadCenter() {
   const [questionCount, setQuestionCount] = useState(5)
   const { toast } = useToast()
   const { user } = useAuth()
+  const { isMobile } = useSidebar()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -277,32 +280,48 @@ export default function UploadCenter() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-4 md:py-6 px-4 md:px-0">
-      <div className="mb-6 md:mb-10 text-center">
-        <h1 className="text-3xl md:text-4xl font-black mb-2 md:mb-4">Upload Center</h1>
-        <p className="text-muted-foreground text-lg">
-          Upload your materials to instantly generate study guides.
-        </p>
-      </div>
+    <div className="max-w-4xl mx-auto py-2 md:py-6 px-3 md:px-0">
+      <div className="flex flex-col gap-4 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="text-center space-y-2 mt-4 md:mt-0">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest animate-pulse">
+             <Sparkles size={14} />
+             Topper Engine v2.0
+          </div>
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+            Upload Center
+          </h1>
+          <p className="text-sm md:text-lg text-muted-foreground max-w-xl mx-auto px-4">
+            Upload your materials to instantly generate high-fidelity study guides.
+          </p>
+        </div>
 
-      <Card className="border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-md">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-3 h-16 bg-muted/50 rounded-none border-b">
-            <TabsTrigger value="file" className="text-base md:text-lg font-bold data-[state=active]:bg-background data-[state=active]:text-primary gap-2">
-              <File size={18} className="shrink-0" />
+        <Card className="border-none shadow-2xl shadow-primary/5 rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-card/50 backdrop-blur-xl border border-white/10">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full h-14 md:h-20 bg-muted/30 p-2 rounded-none border-b">
+            <TabsTrigger 
+              value="file" 
+              className="flex-1 rounded-xl md:rounded-2xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all gap-2 md:gap-3 text-sm md:text-lg font-bold"
+            >
+              <File size={isMobile ? 18 : 22} className="shrink-0" />
               <span>File</span>
             </TabsTrigger>
-            <TabsTrigger value="link" className="text-base md:text-lg font-bold data-[state=active]:bg-background data-[state=active]:text-primary gap-2">
-              <LinkIcon size={18} className="shrink-0" />
+            <TabsTrigger 
+              value="link" 
+              className="flex-1 rounded-xl md:rounded-2xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all gap-2 md:gap-3 text-sm md:text-lg font-bold"
+            >
+              <LinkIcon size={isMobile ? 18 : 22} className="shrink-0" />
               <span>Link</span>
             </TabsTrigger>
-            <TabsTrigger value="text" className="text-base md:text-lg font-bold data-[state=active]:bg-background data-[state=active]:text-primary gap-2">
-              <Type size={18} className="shrink-0" />
+            <TabsTrigger 
+              value="text" 
+              className="flex-1 rounded-xl md:rounded-2xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all gap-2 md:gap-3 text-sm md:text-lg font-bold"
+            >
+              <Type size={isMobile ? 18 : 22} className="shrink-0" />
               <span>Paste</span>
             </TabsTrigger>
           </TabsList>
           
-          <CardContent className="p-4 md:p-10">
+          <CardContent className="p-5 md:p-10">
             <TabsContent value="file" className="m-0">
                 <div 
                   className={`relative border-2 border-dashed rounded-3xl p-6 md:p-12 transition-all duration-300 flex flex-col items-center justify-center gap-4 ${
@@ -491,6 +510,7 @@ export default function UploadCenter() {
           </Card>
         </div>
       )}
+      </div>
     </div>
   )
 }

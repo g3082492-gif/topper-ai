@@ -75,7 +75,7 @@ export function AppSidebar() {
             <div className="p-1.5 md:p-2 rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
               <GraduationCap size={isMobile ? 18 : 22} />
             </div>
-            <span className="font-black text-lg md:text-xl tracking-tight">Topper AI</span>
+            <span className="font-black text-lg md:text-xl tracking-tight group-data-[collapsible=icon]:hidden">Topper AI</span>
           </Link>
           {isMobile && (
             <Button variant="ghost" size="icon" onClick={() => setOpenMobile(false)} className="rounded-full h-8 w-8 hover:bg-muted">
@@ -86,7 +86,7 @@ export function AppSidebar() {
         <Link to="/dashboard/upload" onClick={() => setOpenMobile(false)}>
           <Button className="w-full justify-start gap-2 h-11 rounded-xl shadow-sm border-none bg-primary/10 text-primary hover:bg-primary/20" variant="secondary">
             <Plus size={18} />
-            <span className="font-bold">New Study</span>
+            <span className="font-bold group-data-[collapsible=icon]:hidden">New Study</span>
           </Button>
         </Link>
       </SidebarHeader>
@@ -106,7 +106,7 @@ export function AppSidebar() {
                 >
                   <Link to={item.url} className="gap-3">
                     <item.icon size={20} className={location.pathname === item.url ? "text-primary" : "text-muted-foreground"} />
-                    <span className="font-medium">{item.title}</span>
+                    <span className="font-medium group-data-[collapsible=icon]:hidden">{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
