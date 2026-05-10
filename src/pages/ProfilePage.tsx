@@ -5,7 +5,6 @@ import {
   Settings, 
   Trophy, 
   Zap, 
-  Calendar, 
   Mail, 
   Shield, 
   Camera,
