@@ -85,6 +85,8 @@ export default function UploadCenter() {
         if (!text || text.trim().length < 50) {
           throw new Error("Could not extract enough text from the file. Please ensure it contains readable text (not just images).")
         }
+        // Truncate to avoid context window issues
+        text = text.slice(0, 15000)
         title = file.name
       } else if (activeTab === 'text' && pastedText) {
         text = pastedText

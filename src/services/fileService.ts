@@ -1,9 +1,11 @@
 import * as pdfjs from 'pdfjs-dist'
-import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url"
 import mammoth from 'mammoth'
 
-// Set worker path for pdf.js using Vite's native worker loader
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker
+// Set worker path for pdf.js using Vite's recommended worker loader
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).toString();
 
 export const processFile = async (file: File): Promise<string> => {
   const fileType = file.name.split('.').pop()?.toLowerCase()
@@ -46,9 +48,17 @@ const extractTextFromPDF = async (file: File): Promise<string> => {
 }
 
 const extractTextFromDOCX = async (file: File): Promise<string> => {
-  const arrayBuffer = await file.arrayBuffer()
-  const result = await mammoth.extractRawText({ arrayBuffer })
-  return result.value
+  try {
+    const arrayBuffer = await file.arrayBuffer()
+    const result = await mammoth.extractRawText({ arrayBuffer })
+    if (!result.value.trim()) {
+      throw new Error("DOCX contains no readable text.")
+    }
+    return result.value
+  } catch (error: any) {
+    console.error("DOCX Extraction Error:", error)
+    throw new Error(`Failed to read DOCX: ${error.message}`)
+  }
 }
 
 const extractTextFromTXT = async (file: File): Promise<string> => {
