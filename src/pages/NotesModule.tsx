@@ -21,8 +21,8 @@ export default function NotesModule() {
   const { toast } = useToast()
 
   useEffect(() => {
-    fetchNotes()
-  }, [])
+    if (user) fetchNotes()
+  }, [user])
 
   const fetchNotes = async () => {
     const { data } = await supabase

@@ -17,8 +17,8 @@ export default function SummaryModule() {
   const { user } = useAuth()
 
   useEffect(() => {
-    fetchSummaries()
-  }, [])
+    if (user) fetchSummaries()
+  }, [user])
 
   const fetchSummaries = async () => {
     const { data } = await supabase
