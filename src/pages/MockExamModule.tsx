@@ -64,19 +64,24 @@ export default function MockExamModule() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-10">
                    <div className="space-y-4">
                       <div className="flex justify-between items-center px-2">
-                        <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Number of Questions</label>
-                        <span className="text-primary font-black text-xl">{questionLimit}</span>
+                        <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Session Size</label>
+                        <div className="flex items-center gap-2">
+                           <span className="text-primary font-black text-2xl">{questionLimit}</span>
+                           <span className="text-[10px] text-muted-foreground uppercase font-bold bg-muted px-2 py-0.5 rounded">of {exams[0]?.questions?.length || 0} Total</span>
+                        </div>
                       </div>
                       <input 
                         type="range" 
-                        min="5" 
-                        max={exams[0]?.questions?.length || 20} 
+                        min="1" 
+                        max={exams[0]?.questions?.length || 1} 
                         step="1"
-                        value={questionLimit}
+                        value={questionLimit > (exams[0]?.questions?.length || 0) ? (exams[0]?.questions?.length || 0) : questionLimit}
                         onChange={(e) => setQuestionLimit(parseInt(e.target.value))}
                         className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
                       />
-                      <p className="text-[10px] text-muted-foreground italic px-2">Choose how many questions from the pool to answer.</p>
+                      <p className="text-[10px] text-muted-foreground italic px-2">
+                        Choose how many questions to attempt from the {exams[0]?.questions?.length || 0} generated questions.
+                      </p>
                    </div>
 
                    <div className="space-y-4">

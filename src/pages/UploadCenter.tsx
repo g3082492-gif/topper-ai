@@ -314,20 +314,20 @@ export default function UploadCenter() {
                  <input 
                   type="range" 
                   min="5" 
-                  max="20" 
-                  step="1"
+                  max="50" 
+                  step="5"
                   value={questionCount}
                   onChange={(e) => setQuestionCount(parseInt(e.target.value))}
                   className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
                 />
                 <div className="flex gap-2">
-                   {[5, 10, 15, 20].map((n) => (
+                   {[5, 10, 20, 30, 50].map((n) => (
                      <Button
                       key={n}
                       variant="outline"
                       size="sm"
                       onClick={() => setQuestionCount(n)}
-                      className={`w-10 h-10 rounded-xl font-bold ${questionCount === n ? 'bg-primary text-primary-foreground border-primary' : ''}`}
+                      className={`w-12 h-10 rounded-xl font-bold ${questionCount === n ? 'bg-primary text-primary-foreground border-primary' : ''}`}
                      >
                        {n}
                      </Button>
