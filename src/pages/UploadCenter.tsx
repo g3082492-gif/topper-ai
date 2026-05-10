@@ -28,6 +28,7 @@ export default function UploadCenter() {
   const [status, setStatus] = useState("")
   const [customInstructions, setCustomInstructions] = useState("")
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium')
+  const [questionCount, setQuestionCount] = useState(5)
   const { toast } = useToast()
   const { user } = useAuth()
 
@@ -156,7 +157,7 @@ export default function UploadCenter() {
       }
 
       setStatus("Generating Flashcards...")
-      const flashcardsPrompt = `Generate 5 high-quality flashcards (Question and Answer format) from this content: ${text}. Format your response strictly as a JSON array: [{"question": "...", "answer": "..."}]`
+      const flashcardsPrompt = `Generate ${questionCount} high-quality flashcards (Question and Answer format) from this content: ${text}. Format your response strictly as a JSON array: [{"question": "...", "answer": "..."}]`
       const flashcardsResponse = await generateAIResponse([{ role: 'user', content: flashcardsPrompt }])
       
       const flashcardsData = extractJSON(flashcardsResponse)
@@ -172,7 +173,7 @@ export default function UploadCenter() {
       }
 
       setStatus("Generating Quizzes...")
-      const quizPrompt = `Generate a 5-question multiple choice quiz with ${difficulty.toUpperCase()} difficulty level from this content: ${text}. Format your response strictly as a JSON array: [{"question": "...", "options": ["A", "B", "C", "D"], "correct": 0}]`
+      const quizPrompt = `Generate a ${questionCount}-question multiple choice quiz with ${difficulty.toUpperCase()} difficulty level from this content: ${text}. Format your response strictly as a JSON array: [{"question": "...", "options": ["A", "B", "C", "D"], "correct": 0}]`
       const quizResponse = await generateAIResponse([{ role: 'user', content: quizPrompt }])
 
       const quizData = extractJSON(quizResponse)
@@ -301,6 +302,40 @@ export default function UploadCenter() {
               />
               <p className="text-xs text-muted-foreground italic">
                 These instructions will guide how the AI generates your notes, flashcards, and quizzes.
+              </p>
+            </div>
+
+            <div className="mt-8 space-y-4">
+              <div className="flex justify-between items-center">
+                <Label className="text-lg font-bold">Number of Questions/Flashcards</Label>
+                <span className="text-primary font-black text-xl">{questionCount}</span>
+              </div>
+              <div className="flex gap-4 items-center">
+                 <input 
+                  type="range" 
+                  min="5" 
+                  max="20" 
+                  step="1"
+                  value={questionCount}
+                  onChange={(e) => setQuestionCount(parseInt(e.target.value))}
+                  className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                />
+                <div className="flex gap-2">
+                   {[5, 10, 15, 20].map((n) => (
+                     <Button
+                      key={n}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setQuestionCount(n)}
+                      className={`w-10 h-10 rounded-xl font-bold ${questionCount === n ? 'bg-primary text-primary-foreground border-primary' : ''}`}
+                     >
+                       {n}
+                     </Button>
+                   ))}
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground italic">
+                Choose how many questions and flashcards the AI should generate from your material.
               </p>
             </div>
 
