@@ -247,9 +247,9 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8">
          {/* Account Info */}
-         <Card className="border-none shadow-2xl rounded-[2.5rem] bg-card/50 backdrop-blur-md">
+         <Card className="md:col-span-2 border-none shadow-2xl rounded-[2.5rem] bg-card/50 backdrop-blur-md">
             <CardHeader className="p-8">
                <CardTitle className="text-xl font-bold flex items-center gap-2">
                   <Shield size={20} className="text-primary" />
@@ -276,33 +276,6 @@ export default function ProfilePage() {
                      </div>
                   </div>
                   <Button variant="ghost" size="sm" className="text-primary text-xs font-bold">Update</Button>
-               </div>
-            </CardContent>
-         </Card>
-
-         {/* Study History */}
-         <Card className="border-none shadow-2xl rounded-[2.5rem] bg-card/50 backdrop-blur-md">
-            <CardHeader className="p-8">
-               <CardTitle className="text-xl font-bold flex items-center gap-2">
-                  <Calendar size={20} className="text-primary" />
-                  Study Log
-               </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8 pt-0">
-               <div className="space-y-4">
-                  {[
-                     { activity: "Study Session", duration: "120 mins", date: "Today" },
-                     { activity: "Generated Notes", duration: "3 files", date: "Yesterday" },
-                     { activity: "Group Discussion", duration: "45 mins", date: "Feb 22" },
-                  ].map((log, i) => (
-                     <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-muted/30">
-                        <div>
-                           <p className="text-sm font-bold">{log.activity}</p>
-                           <p className="text-xs text-muted-foreground">{log.date}</p>
-                        </div>
-                        <span className="text-sm font-black text-primary">{log.duration}</span>
-                     </div>
-                  ))}
                </div>
             </CardContent>
          </Card>
