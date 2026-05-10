@@ -7,7 +7,6 @@ import {
   FileText, 
   Clock, 
   ChevronRight,
-  TrendingUp,
   BarChart2
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card.tsx"
@@ -52,7 +51,13 @@ const StatCard = ({ title, value, icon: Icon, color, description }: any) => (
 )
 
 export default function DashboardOverview() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    streak: number;
+    points: number;
+    notes: number;
+    totalStudents: number;
+    improvement: number;
+  }>({
     streak: 0,
     points: 0,
     notes: 0,
