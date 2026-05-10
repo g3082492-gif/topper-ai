@@ -3,7 +3,7 @@ import { supabase } from "../lib/supabase"
 import { useAuth } from "../hooks/useAuth"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.tsx"
 import { Button } from "../components/ui/button.tsx"
-import { FileText, Download, Share2, Search, X } from "lucide-react"
+import { FileText, Download, Share2, Search, X, Maximize2, Minimize2 } from "lucide-react"
 import { Input } from "../components/ui/input.tsx"
 import { jsPDF } from "jspdf"
 import ReactMarkdown from 'react-markdown'
@@ -13,6 +13,7 @@ export default function SummaryModule() {
   const [summaries, setSummaries] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedSummary, setSelectedSummary] = useState<any>(null)
+  const [isMaximized, setIsMaximized] = useState(false)
   const { user } = useAuth()
 
   useEffect(() => {
@@ -112,14 +113,26 @@ export default function SummaryModule() {
       )}
 
       {selectedSummary && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md md:p-4">
-          <Card className="w-full h-full md:h-auto md:max-w-4xl md:max-h-[90vh] flex flex-col border-none shadow-2xl md:rounded-[2rem] bg-background">
+        <div className={`fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md ${isMaximized ? 'p-0' : 'md:p-4'}`}>
+          <Card className={`w-full h-full flex flex-col border-none shadow-2xl bg-background transition-all duration-300 ${
+            isMaximized 
+              ? 'md:max-w-none md:h-screen md:rounded-none' 
+              : 'md:max-w-4xl md:h-auto md:max-h-[90vh] md:rounded-[2rem]'
+          }`}>
             <CardHeader className="flex flex-row items-center justify-between border-b px-4 md:px-8 py-2 md:py-4 shrink-0 bg-card/50 relative">
               <div className="max-w-[70%]">
                 <CardTitle className="text-lg md:text-2xl font-black line-clamp-1">{selectedSummary.title}</CardTitle>
                 <p className="text-[10px] md:text-sm text-muted-foreground mt-0.5 line-clamp-1">Source: {selectedSummary.documents?.title}</p>
               </div>
               <div className="flex items-center gap-1 md:gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setIsMaximized(!isMaximized)} 
+                  className="hidden md:flex h-9 w-9 rounded-full"
+                >
+                  {isMaximized ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                </Button>
                 <Button variant="ghost" size="icon" onClick={(e) => downloadPDF(e, selectedSummary)} className="h-9 w-9 rounded-full">
                   <Download size={18} />
                 </Button>
