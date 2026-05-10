@@ -56,7 +56,8 @@ export default function DashboardOverview() {
     streak: 0,
     points: 0,
     notes: 0,
-    improvement: 0
+    totalStudents: 0,
+    improvement: 5
   })
   const [activities, setActivities] = useState<any[]>([])
   const { user } = useAuth()
@@ -79,6 +80,10 @@ export default function DashboardOverview() {
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
 
+    const { count: totalStudents } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+
     const { data: recentDocs } = await supabase
       .from('documents')
       .select('*')
@@ -90,6 +95,7 @@ export default function DashboardOverview() {
       streak: profile?.streak || 0,
       points: profile?.points || 0,
       notes: notesCount || 0,
+      totalStudents: totalStudents || 0,
       improvement: 5
     })
     setActivities(recentDocs || [])
@@ -130,7 +136,7 @@ export default function DashboardOverview() {
           value={stats.points.toLocaleString()} 
           icon={Trophy} 
           color="bg-primary/10 text-primary"
-          description="Level 4: Advanced Learner"
+          description="Level 4: Scholar"
         />
         <StatCard 
           title="Notes Generated" 
@@ -140,11 +146,11 @@ export default function DashboardOverview() {
           description="Total generated"
         />
         <StatCard 
-          title="Average Score" 
-          value={`${80 + stats.improvement}%`} 
-          icon={TrendingUp} 
-          color="bg-green-500/10 text-green-500"
-          description="+5% improvement"
+          title="Global Scholars" 
+          value={stats.totalStudents.toLocaleString()} 
+          icon={BarChart2} 
+          color="bg-purple-500/10 text-purple-500"
+          description="Joining Topper AI"
         />
       </div>
 
