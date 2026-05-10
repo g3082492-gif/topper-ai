@@ -408,16 +408,95 @@ export default function UploadCenter() {
               </div>
             </div>
 
-            <div className="mt-10">
-               <Button 
-                    <item.icon size={20} className={item.color} />
-                    <span className="text-xs font-bold uppercase tracking-widest">{item.label}</span>
-                 </div>
-               ))}
+            <div className="mt-10 space-y-6">
+              <Button 
+                className="w-full h-16 rounded-2xl text-xl font-black shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                onClick={handleUpload}
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="animate-spin" size={24} />
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Zap size={20} className="fill-current" />
+                    Generate Study Guide
+                  </div>
+                )}
+              </Button>
+
+              {isProcessing && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
+                  <div className="flex justify-between text-sm font-bold px-1">
+                    <span className="text-primary">{status}</span>
+                    <span className="text-muted-foreground">{Math.round((currentStep / (steps.length - 1)) * 100)}%</span>
+                  </div>
+                  <div className="h-3 bg-muted rounded-full overflow-hidden border shadow-inner">
+                    <div 
+                      className="h-full bg-primary transition-all duration-500 ease-out shadow-[0_0_15px_rgba(var(--primary),0.5)]"
+                      style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-5 gap-1">
+                    {steps.map((_, i) => (
+                        <div key={i} className={`h-1 rounded-full ${i <= currentStep ? 'bg-primary' : 'bg-muted'}`} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Tabs>
       </Card>
+
+      {/* Success Modal */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/90 backdrop-blur-md p-4">
+          <Card className="w-full max-w-lg border-none shadow-[0_0_50px_rgba(var(--primary),0.2)] rounded-[2.5rem] overflow-hidden animate-in zoom-in-95 duration-300">
+             <div className="bg-primary p-12 text-primary-foreground flex flex-col items-center text-center">
+                <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                   <CheckCircle2 size={48} className="text-white" />
+                </div>
+                <h2 className="text-3xl font-black mb-2">Generation Complete!</h2>
+                <p className="opacity-90">Your high-quality study materials are ready.</p>
+             </div>
+             <CardContent className="p-8 space-y-4">
+                <Button 
+                  className="w-full h-14 rounded-xl text-lg font-bold gap-2"
+                  onClick={() => navigate('/dashboard/notes')}
+                >
+                  View My Notes
+                  <ArrowRight size={20} />
+                </Button>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button 
+                    variant="outline" 
+                    className="h-14 rounded-xl font-bold"
+                    onClick={() => navigate('/dashboard/summaries')}
+                  >
+                    Summary
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="h-14 rounded-xl font-bold"
+                    onClick={() => navigate('/dashboard/flashcards')}
+                  >
+                    Flashcards
+                  </Button>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  className="w-full h-12 rounded-xl text-muted-foreground"
+                  onClick={() => setShowSuccess(false)}
+                >
+                  Upload Another
+                </Button>
+             </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }
