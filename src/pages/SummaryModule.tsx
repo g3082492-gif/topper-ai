@@ -6,7 +6,6 @@ import { Button } from "../components/ui/button.tsx"
 import { FileText, Download, Share2, Search, X } from "lucide-react"
 import { Input } from "../components/ui/input.tsx"
 import { jsPDF } from "jspdf"
-import { ScrollArea } from "../components/ui/scroll-area.tsx"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 

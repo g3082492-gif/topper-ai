@@ -21,7 +21,7 @@ export default function QuizModule() {
   }, [])
 
   useEffect(() => {
-    let timer: NodeJS.Timeout
+    let timer: any
     if (currentQuiz && !showResult && timeLeft > 0) {
       timer = setInterval(() => {
         setTimeLeft(prev => prev - 1)
