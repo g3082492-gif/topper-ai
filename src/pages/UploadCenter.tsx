@@ -4,14 +4,8 @@ import {
   Link as LinkIcon, 
   File,
   Loader2,
-  AlertCircle,
-  FileText,
-  Sparkles,
-  Brain,
   Zap,
   Type,
-  Plus,
-  X,
   CheckCircle2,
   ArrowRight
 } from "lucide-react"
