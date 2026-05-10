@@ -22,6 +22,7 @@ import {
   AreaChart,
   Area
 } from 'recharts'
+import { useNavigate } from "react-router-dom"
 
 const data = [
   { day: 'Mon', minutes: 45 },
