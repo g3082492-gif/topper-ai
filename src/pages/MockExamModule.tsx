@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom"
 export default function MockExamModule() {
   const [exams, setExams] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [customTime, setCustomTime] = useState(30)
+  const [questionLimit, setQuestionLimit] = useState(10)
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -59,39 +61,66 @@ export default function MockExamModule() {
                </CardDescription>
             </CardHeader>
             <CardContent className="p-10 pt-0">
-               <div className="grid grid-cols-2 gap-6 my-10">
-                  <div className="p-6 rounded-3xl bg-muted/50 border text-center">
-                     <p className="text-2xl font-black">{exams[0]?.questions?.length || 0}</p>
-                     <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Questions</p>
-                  </div>
-                  <div className="p-6 rounded-3xl bg-muted/50 border text-center">
-                     <p className="text-2xl font-black">Medium</p>
-                     <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Difficulty</p>
-                  </div>
-               </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-10">
+                   <div className="space-y-4">
+                      <div className="flex justify-between items-center px-2">
+                        <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Number of Questions</label>
+                        <span className="text-primary font-black text-xl">{questionLimit}</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="5" 
+                        max={exams[0]?.questions?.length || 20} 
+                        step="1"
+                        value={questionLimit}
+                        onChange={(e) => setQuestionLimit(parseInt(e.target.value))}
+                        className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                      />
+                      <p className="text-[10px] text-muted-foreground italic px-2">Choose how many questions from the pool to answer.</p>
+                   </div>
 
-               <div className="space-y-4 mb-10">
-                  <h4 className="font-bold flex items-center gap-2">
-                     <AlertTriangle size={18} className="text-yellow-500" />
-                     Exam Rules
-                  </h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                     <li className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                        No external tabs or applications allowed.
-                     </li>
-                     <li className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                        The exam will be automatically submitted when timer ends.
-                     </li>
-                  </ul>
-               </div>
+                   <div className="space-y-4">
+                      <div className="flex justify-between items-center px-2">
+                        <label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Exam Duration (Mins)</label>
+                        <span className="text-primary font-black text-xl">{customTime}</span>
+                      </div>
+                      <div className="flex gap-2">
+                         {[15, 30, 45, 60].map((t) => (
+                           <Button 
+                            key={t}
+                            variant={customTime === t ? 'default' : 'outline'}
+                            onClick={() => setCustomTime(t)}
+                            className="flex-1 rounded-xl h-12 font-bold"
+                           >
+                             {t}m
+                           </Button>
+                         ))}
+                      </div>
+                   </div>
+                </div>
 
-               <Button 
-                disabled={!exams[0]} 
-                onClick={() => navigate(`/dashboard/exam-session?id=${exams[0].id}`)}
-                className="w-full h-16 rounded-2xl text-xl font-black group"
-               >
+                <div className="space-y-4 mb-10">
+                   <h4 className="font-bold flex items-center gap-2">
+                      <AlertTriangle size={18} className="text-yellow-500" />
+                      Exam Rules
+                   </h4>
+                   <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-center gap-2">
+                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                         No external tabs or applications allowed.
+                      </li>
+                      <li className="flex items-center gap-2">
+                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                         The exam will end automatically in {customTime} minutes.
+                      </li>
+                   </ul>
+                </div>
+
+                <Button 
+                 disabled={!exams[0]} 
+                 onClick={() => navigate(`/dashboard/exam-session?id=${exams[0].id}&time=${customTime}&limit=${questionLimit}`)}
+                 className="w-full h-16 rounded-2xl text-xl font-black group shadow-2xl shadow-primary/30"
+                >
                   Begin Examination
                   <ArrowRight size={24} className="ml-2 group-hover:translate-x-2 transition-transform" />
                </Button>

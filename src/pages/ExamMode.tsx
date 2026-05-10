@@ -10,10 +10,13 @@ import { useToast } from "../hooks/use-toast.ts"
 export default function ExamMode() {
   const [searchParams] = useSearchParams()
   const quizId = searchParams.get('id')
+  const customTime = parseInt(searchParams.get('time') || '30')
+  const questionLimit = parseInt(searchParams.get('limit') || '999')
+  
   const [exam, setExam] = useState<any>(null)
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<number, number>>({})
-  const [timeLeft, setTimeLeft] = useState(1800) // 30 minutes
+  const [timeLeft, setTimeLeft] = useState(customTime * 60)
   const [isFinished, setIsFinished] = useState(false)
   const [score, setScore] = useState(0)
   const { user } = useAuth()
@@ -40,7 +43,11 @@ export default function ExamMode() {
       .eq('id', quizId)
       .single()
     
-    if (data) setExam(data)
+    if (data) {
+      // Limit questions based on user preference
+      const limitedQuestions = data.questions.slice(0, questionLimit)
+      setExam({ ...data, questions: limitedQuestions })
+    }
   }
 
   const formatTime = (seconds: number) => {
