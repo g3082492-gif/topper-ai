@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { SidebarProvider, SidebarTrigger } from "../components/ui/sidebar.tsx"
 import { AppSidebar } from "../components/layout/AppSidebar.tsx"
+import { GraduationCap } from "lucide-react"
 import DashboardOverview from "./DashboardOverview.tsx"
 import UploadCenter from "./UploadCenter.tsx"
 import NotesModule from "./NotesModule.tsx"
@@ -20,11 +21,16 @@ export default function Dashboard() {
       <div className="flex min-h-screen bg-background w-full">
         <AppSidebar />
         <main className="flex-1 overflow-auto">
-          <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-6 sticky top-0 bg-background/80 backdrop-blur-md z-40">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger className="-ml-1 h-9 w-9 rounded-xl border bg-background shadow-sm" />
+          <header className="flex h-14 md:h-16 shrink-0 items-center justify-between gap-2 border-b px-4 md:px-6 sticky top-0 bg-background/80 backdrop-blur-md z-40">
+            <div className="flex items-center gap-2 md:gap-4">
+              <SidebarTrigger className="h-9 w-9 rounded-xl border bg-background shadow-sm hover:bg-muted transition-colors" />
               <div className="h-6 w-px bg-border hidden md:block" />
-              <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest hidden md:block">Topper Platform</h2>
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-primary text-primary-foreground">
+                  <GraduationCap size={18} />
+                </div>
+                <h2 className="text-sm font-bold tracking-tight hidden sm:block">Topper AI</h2>
+              </div>
             </div>
           </header>
           <div className="p-4 md:p-8 max-w-[1600px] mx-auto">

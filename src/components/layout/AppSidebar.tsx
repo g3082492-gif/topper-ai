@@ -71,15 +71,15 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4 border-b">
         <div className="flex items-center justify-between mb-4">
-          <Link to="/dashboard" className="flex items-center gap-3" onClick={() => setOpenMobile(false)}>
-            <div className="p-2 rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-              <GraduationCap size={22} />
+          <Link to="/dashboard" className="flex items-center gap-2 md:gap-3" onClick={() => setOpenMobile(false)}>
+            <div className="p-1.5 md:p-2 rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+              <GraduationCap size={isMobile ? 18 : 22} />
             </div>
-            <span className="font-black text-xl tracking-tight">Topper AI</span>
+            <span className="font-black text-lg md:text-xl tracking-tight">Topper AI</span>
           </Link>
           {isMobile && (
-            <Button variant="ghost" size="icon" onClick={() => setOpenMobile(false)} className="rounded-full h-8 w-8">
-              <X size={20} />
+            <Button variant="ghost" size="icon" onClick={() => setOpenMobile(false)} className="rounded-full h-8 w-8 hover:bg-muted">
+              <X size={18} />
             </Button>
           )}
         </div>
