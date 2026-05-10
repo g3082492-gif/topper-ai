@@ -20,10 +20,14 @@ export default function Dashboard() {
       <div className="flex min-h-screen bg-background w-full">
         <AppSidebar />
         <main className="flex-1 overflow-auto">
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 bg-background/80 backdrop-blur-md z-10">
-            <SidebarTrigger className="-ml-1" />
+          <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-6 sticky top-0 bg-background/80 backdrop-blur-md z-40">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="-ml-1 h-9 w-9 rounded-xl border bg-background shadow-sm" />
+              <div className="h-6 w-px bg-border hidden md:block" />
+              <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest hidden md:block">Topper Platform</h2>
+            </div>
           </header>
-          <div className="p-4 md:p-8">
+          <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
             <Routes>
               <Route index element={<DashboardOverview />} />
               <Route path="upload" element={<UploadCenter />} />

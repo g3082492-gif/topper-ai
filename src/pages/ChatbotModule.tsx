@@ -68,15 +68,15 @@ export default function ChatbotModule() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-10rem)] max-w-5xl mx-auto">
+    <div className="flex flex-col h-[calc(100vh-12rem)] md:h-[calc(100vh-10rem)] max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
            <div className="w-12 h-12 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
               <Bot size={28} />
            </div>
            <div>
-              <h1 className="text-2xl font-black">AI Study Companion</h1>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <h1 className="text-xl md:text-2xl font-black">AI Study Companion</h1>
+              <p className="text-[10px] md:text-xs text-muted-foreground flex items-center gap-1">
                  <Sparkles size={12} className="text-primary" />
                  Powered by Gemini 2.0 Flash
               </p>
@@ -100,12 +100,12 @@ export default function ChatbotModule() {
         </div>
       </div>
 
-      <Card className="flex-1 overflow-hidden border-none shadow-2xl flex flex-col rounded-[2.5rem] bg-card/50 backdrop-blur-md">
-        <ScrollArea className="flex-1 p-6">
+      <Card className="flex-1 overflow-hidden border-none shadow-2xl flex flex-col rounded-[1.5rem] md:rounded-[2.5rem] bg-card/50 backdrop-blur-md">
+        <ScrollArea className="flex-1 p-4 md:p-6">
           <div className="space-y-6">
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`flex gap-3 max-w-[80%] ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className={`flex gap-3 max-w-[90%] md:max-w-[80%] ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
                     m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                   }`}>
@@ -138,11 +138,11 @@ export default function ChatbotModule() {
           </div>
         </ScrollArea>
 
-        <div className="p-6 border-t bg-background/50">
+        <div className="p-4 md:p-6 border-t bg-background/50">
           <div className="relative">
              <Input 
-               placeholder="Ask anything about your study material..." 
-               className="h-16 pl-6 pr-16 rounded-[1.5rem] border-2 border-muted focus-visible:border-primary transition-all text-lg shadow-inner bg-card"
+               placeholder="Ask anything..." 
+               className="h-14 md:h-16 pl-4 md:pl-6 pr-14 md:pr-16 rounded-[1.2rem] md:rounded-[1.5rem] border-2 border-muted focus-visible:border-primary transition-all text-base md:text-lg shadow-inner bg-card"
                value={input}
                onChange={(e) => setInput(e.target.value)}
                onKeyDown={(e) => e.key === 'Enter' && handleSend()}

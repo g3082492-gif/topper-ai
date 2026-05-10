@@ -119,31 +119,31 @@ export default function ProfilePage() {
     <div className="max-w-5xl mx-auto space-y-10 pb-20">
       {/* Header Profile Section */}
       <div className="relative">
-        <div className="h-48 w-full bg-gradient-to-r from-primary/20 via-primary/5 to-transparent rounded-[2.5rem]" />
-        <div className="absolute -bottom-10 left-10 flex flex-col md:flex-row items-end gap-6">
+        <div className="h-32 md:h-48 w-full bg-gradient-to-r from-primary/20 via-primary/5 to-transparent rounded-[1.5rem] md:rounded-[2.5rem]" />
+        <div className="absolute -bottom-12 left-4 md:left-10 flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 w-full md:w-auto">
            <div className="relative group">
-              <Avatar className="w-32 h-32 border-4 border-background shadow-2xl rounded-3xl">
+              <Avatar className="w-24 h-24 md:w-32 md:h-32 border-4 border-background shadow-2xl rounded-3xl">
                 <AvatarImage src={user?.user_metadata?.avatar_url} />
-                <AvatarFallback className="bg-primary text-primary-foreground text-4xl font-black rounded-3xl">
+                <AvatarFallback className="bg-primary text-primary-foreground text-3xl md:text-4xl font-black rounded-3xl">
                   {user?.email?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <button className="absolute bottom-2 right-2 p-2 bg-background rounded-xl shadow-lg hover:text-primary transition-colors border">
-                 <Camera size={16} />
+              <button className="absolute bottom-2 right-2 p-1.5 md:p-2 bg-background rounded-xl shadow-lg hover:text-primary transition-colors border">
+                 <Camera size={14} />
               </button>
            </div>
-           <div className="pb-4">
-              <h1 className="text-4xl font-black">{profile?.full_name || user?.email?.split('@')[0]}</h1>
-              <p className="text-muted-foreground flex items-center gap-2">
+           <div className="pb-0 md:pb-4 text-center md:text-left">
+              <h1 className="text-2xl md:text-4xl font-black">{profile?.full_name || user?.email?.split('@')[0]}</h1>
+              <p className="text-sm text-muted-foreground flex items-center justify-center md:justify-start gap-2">
                  <Mail size={14} />
                  {user?.email}
               </p>
            </div>
         </div>
         <div className="absolute top-4 right-4">
-           <Button onClick={() => setIsEditing(true)} variant="secondary" className="gap-2 rounded-xl backdrop-blur-md bg-background/50">
-              <Settings size={18} />
-              Edit Profile
+           <Button onClick={() => setIsEditing(true)} variant="secondary" size="sm" className="gap-2 rounded-xl backdrop-blur-md bg-background/50">
+              <Settings size={16} />
+              <span className="hidden sm:inline">Edit Profile</span>
            </Button>
         </div>
       </div>
@@ -280,15 +280,15 @@ export default function ProfilePage() {
          </Card>
       </div>
 
-      <Card className="border-none shadow-2xl rounded-[2.5rem] bg-destructive/5 border border-destructive/20 mt-12 overflow-hidden">
-        <div className="flex flex-col md:flex-row items-center justify-between p-10 gap-6">
-          <div className="space-y-2">
-            <h3 className="text-2xl font-black text-destructive">Danger Zone</h3>
-            <p className="text-muted-foreground">Wipe your account clean to start fresh. This will delete all your study materials and reset your rank.</p>
+      <Card className="border-none shadow-2xl rounded-[1.5rem] md:rounded-[2.5rem] bg-destructive/5 border border-destructive/20 mt-12 overflow-hidden">
+        <div className="flex flex-col md:flex-row items-center justify-between p-6 md:p-10 gap-6">
+          <div className="space-y-2 text-center md:text-left">
+            <h3 className="text-xl md:text-2xl font-black text-destructive">Danger Zone</h3>
+            <p className="text-sm md:text-base text-muted-foreground">Wipe your account clean to start fresh. This will delete all your study materials and reset your rank.</p>
           </div>
           <Button 
             variant="destructive" 
-            className="h-14 px-10 rounded-2xl font-bold shadow-lg shadow-destructive/20"
+            className="w-full md:w-auto h-12 md:h-14 px-10 rounded-2xl font-bold shadow-lg shadow-destructive/20"
             onClick={handleResetData}
           >
             Reset My Progress

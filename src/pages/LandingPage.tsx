@@ -32,11 +32,11 @@ export default function LandingPage() {
               <Sparkles size={16} />
               AI-Powered Learning Revolution
             </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-8">
+            <h1 className="text-4xl md:text-7xl font-black tracking-tight mb-6 md:mb-8">
               Become a <span className="text-primary">Topper</span> with <br />
               Personalized AI Study.
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed">
               Upload your study materials and let our AI generate notes, flashcards, 
               quizzes, and mind maps in seconds. The ultimate study companion for students.
             </p>

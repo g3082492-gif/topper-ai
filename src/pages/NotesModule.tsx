@@ -93,11 +93,18 @@ export default function NotesModule() {
         <Input 
           placeholder="Search your notes..." 
           className="pl-10 h-12 rounded-2xl bg-card border-none shadow-sm"
+          onChange={(e) => {
+            const query = e.target.value.toLowerCase()
+            setNotes(prev => prev.map(n => ({
+              ...n,
+              hidden: !(n.title.toLowerCase().includes(query) || n.content.toLowerCase().includes(query))
+            })))
+          }}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {notes.map((note) => (
+        {notes.filter(n => !n.hidden).map((note) => (
           <Card 
             key={note.id} 
             className="border-none shadow-md hover:shadow-xl transition-all cursor-pointer group flex flex-col h-[280px]"
@@ -139,9 +146,9 @@ export default function NotesModule() {
 
       {/* Manual Entry Modal */}
       {isAdding && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-2xl border-none shadow-2xl rounded-[2rem]">
-            <CardHeader className="flex flex-row items-center justify-between border-b p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 overflow-y-auto">
+          <Card className="w-full max-w-2xl border-none shadow-2xl rounded-[2rem] my-auto">
+            <CardHeader className="flex flex-row items-center justify-between border-b p-4 md:p-6">
               <CardTitle className="text-2xl font-black">Manual Entry</CardTitle>
               <Button variant="ghost" size="icon" onClick={() => setIsAdding(false)} className="rounded-full">
                 <X size={24} />
@@ -175,9 +182,9 @@ export default function NotesModule() {
       )}
 
       {selectedNote && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-4xl max-h-[90vh] flex flex-col border-none shadow-2xl rounded-[2rem]">
-            <CardHeader className="flex flex-row items-center justify-between border-b px-8 py-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 overflow-y-auto">
+          <Card className="w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] flex flex-col border-none shadow-2xl rounded-[1.5rem] md:rounded-[2rem] my-auto">
+            <CardHeader className="flex flex-row items-center justify-between border-b px-4 md:px-8 py-4 md:py-6 shrink-0">
               <div>
                 <CardTitle className="text-2xl font-black">{selectedNote.title}</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">Source: {selectedNote.documents?.title || 'Manual Entry'}</p>
@@ -192,7 +199,7 @@ export default function NotesModule() {
               </div>
             </CardHeader>
             <CardContent className="flex-1 overflow-hidden p-0">
-              <ScrollArea className="h-[calc(90vh-8rem)] px-8 py-6">
+              <ScrollArea className="h-full px-4 md:px-8 py-4 md:py-6">
                 <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed text-base prose-headings:font-black prose-p:text-muted-foreground prose-strong:text-foreground">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {selectedNote.content}

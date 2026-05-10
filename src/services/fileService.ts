@@ -2,7 +2,7 @@ import * as pdfjs from 'pdfjs-dist'
 import mammoth from 'mammoth'
 
 // Set worker path for pdf.js
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`
 
 export const processFile = async (file: File): Promise<string> => {
   const fileType = file.name.split('.').pop()?.toLowerCase()

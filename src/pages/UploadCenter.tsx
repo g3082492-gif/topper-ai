@@ -8,7 +8,8 @@ import {
   FileText,
   Sparkles,
   Brain,
-  Zap
+  Zap,
+  Type
 } from "lucide-react"
 import { Button } from "../components/ui/button.tsx"
 import { Card, CardContent } from "../components/ui/card.tsx"
@@ -18,12 +19,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs.
 import { processFile } from "../services/fileService"
 import { generateAIResponse } from "../services/aiService"
 import { useToast } from "../hooks/use-toast.ts"
+import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { useAuth } from "../hooks/useAuth"
 
 export default function UploadCenter() {
+  const navigate = useNavigate()
   const [file, setFile] = useState<File | null>(null)
   const [link, setLink] = useState("")
+  const [pastedText, setPastedText] = useState("")
+  const [activeTab, setActiveTab] = useState("file")
   const [isProcessing, setIsProcessing] = useState(false)
   const [status, setStatus] = useState("")
   const [customInstructions, setCustomInstructions] = useState("")
@@ -48,10 +53,10 @@ export default function UploadCenter() {
       return
     }
 
-    if (!file && !link) {
+    if (!file && !link && !pastedText) {
       toast({
         title: "Missing input",
-        description: "Please upload a file or provide a link.",
+        description: "Please upload a file, provide a link, or paste some text.",
         variant: "destructive"
       })
       return
@@ -62,29 +67,80 @@ export default function UploadCenter() {
 
     try {
       let text = ""
-      if (file) {
+      let title = "URL Content"
+      
+      if (activeTab === 'file' && file) {
         text = await processFile(file)
-      } else {
+        title = file.name
+      } else if (activeTab === 'text' && pastedText) {
+        text = pastedText
+        title = pastedText.slice(0, 30) + (pastedText.length > 30 ? "..." : "")
+      } else if (activeTab === 'link' && link) {
         setStatus("Fetching website content...")
+        let targetUrl = link.trim()
+        if (!targetUrl.startsWith('http')) {
+          targetUrl = 'https://' + targetUrl
+        }
+        
         try {
-          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(link)}`
-          const response = await fetch(proxyUrl)
-          if (!response.ok) throw new Error("Failed to fetch the URL.")
-          const html = await response.text()
+          // Try multiple proxies if one fails
+          const proxies = [
+            (u: string) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+            (u: string) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+            (u: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
+          ]
+          
+          let html = ""
+          
+          for (const getProxyUrl of proxies) {
+            try {
+              const proxyUrl = getProxyUrl(targetUrl)
+              const response = await fetch(proxyUrl)
+              if (response.ok) {
+                if (proxyUrl.includes('allorigins')) {
+                  const data = await response.json()
+                  html = data.contents
+                } else {
+                  html = await response.text()
+                }
+                // Check if we got actual content, not just a small string or error page
+                if (html && html.length > 500) break
+              }
+            } catch (e) {
+              console.warn("Proxy failed, trying next...")
+            }
+          }
+
+          if (!html || html.length < 200) {
+            throw new Error("Could not fetch meaningful content from this URL. The site might be protected or require JavaScript. Try copying the text manually.")
+          }
+          
           const parser = new DOMParser()
           const htmlDoc = parser.parseFromString(html, 'text/html')
           
+          // Get title
+          const pageTitle = htmlDoc.querySelector('title')?.textContent || htmlDoc.querySelector('h1')?.textContent
+          if (pageTitle) title = pageTitle
+
           // Remove non-content elements
-          htmlDoc.querySelectorAll('script, style, nav, footer, header, ads').forEach(el => el.remove())
+          htmlDoc.querySelectorAll('script, style, nav, footer, header, ads, .ads, .sidebar, #sidebar, .menu, footer').forEach(el => el.remove())
           
-          text = htmlDoc.body.innerText.replace(/\s+/g, ' ').trim()
-          if (text.length < 100) throw new Error("Could not extract enough text from the URL.")
+          // Try to get content from main article if possible
+          const mainContent = htmlDoc.querySelector('article, main, .content, #content, .post-content')
+          text = (mainContent as HTMLElement || htmlDoc.body)?.innerText.replace(/\s+/g, ' ').trim() || ""
           
-          // Truncate if too long for AI context (keeping a reasonable amount)
-          text = text.slice(0, 10000)
-        } catch (e) {
+          if (text.length < 150) {
+             // Fallback to body if selector failed or text is too short
+             text = htmlDoc.body?.innerText.replace(/\s+/g, ' ').trim() || ""
+          }
+
+          if (text.length < 100) throw new Error("Could not extract enough text from the URL. Please try copying the text manually.")
+          
+          // Truncate if too long for AI context
+          text = text.slice(0, 15000)
+        } catch (e: any) {
           console.error("Link extraction failed:", e)
-          throw new Error("Failed to extract content from the URL. Please ensure it's a valid public link or try a different one.")
+          throw new Error(e.message || "Failed to extract content from the URL.")
         }
       }
 
@@ -97,7 +153,7 @@ export default function UploadCenter() {
 
       const { data: doc, error: docError } = await supabase.from('documents').insert({
         user_id: user?.id,
-        title: file ? file.name : "URL Content",
+        title: title,
         content: text,
         file_type: file ? (file.name.split('.').pop() || 'file') : 'link',
         metadata: { status: 'processing' }
@@ -111,22 +167,22 @@ export default function UploadCenter() {
       - Use Markdown for all formatting.
       - Main Title: # Cheat Sheet: [Topic Name]
       - Section Headers: ## [Section Name] (e.g., Key Concepts, Exam Focus)
-      - Sub-headers: ### [Sub-topic]
-      - Key Terms: Use **bold** for keywords followed by their definition. (e.g., - **Term**: Definition)
+      - Key Terms: Use **bold** for keywords followed by their definition.
       - Tables: ALWAYS use Markdown tables for "Key Events / Concepts" with columns: | Period / Event | Definition / Concept | Relevance to Exams |
-      - Cause and Effect: Use bullet points with arrows (e.g., - Deforestation -> Habitat Loss -> Biodiversity Decline).
-      - Quick Reference: A final section with ## Quick Reference and bullet points.
-      - Footer: Use a separator --- and a small footer like *Generated by Topper AI Study Guide*.
+      - Cause and Effect: Use bullet points with arrows.
+      - Footer: Use a separator --- and *Generated by Topper AI*.
       
       Make it look exactly like a professional study guide. ${customInstructions ? `Additional Instructions: ${customInstructions}` : ""}`
+      
       const notesResponse = await generateAIResponse([{ role: 'user', content: notesPrompt }])
       
-      await supabase.from('notes').insert({
+      const { error: nError } = await supabase.from('notes').insert({
         document_id: doc.id,
         user_id: user?.id,
         content: notesResponse,
         title: `Notes: ${doc.title}`
       })
+      if (nError) throw nError
 
       setStatus("Generating Summary...")
       const summaryPrompt = `Generate a concise, high-fidelity summary of the following content: ${text}. 
@@ -134,17 +190,18 @@ export default function UploadCenter() {
       - Title: # Summary: [Topic Name]
       - Use ## Section Headers.
       - Use **bold** for important terms.
-      - Use - for bullet points.
       - Include a ## Conclusion section.
       ${customInstructions ? `Additional Instructions: ${customInstructions}` : ""}`
+      
       const summaryResponse = await generateAIResponse([{ role: 'user', content: summaryPrompt }])
 
-      await supabase.from('notes').insert({
+      const { error: sError } = await supabase.from('notes').insert({
         document_id: doc.id,
         user_id: user?.id,
         content: summaryResponse,
         title: `Summary: ${doc.title}`
       })
+      if (sError) throw sError
 
       const extractJSON = (str: string) => {
         try {
@@ -157,63 +214,85 @@ export default function UploadCenter() {
       }
 
       setStatus("Generating Flashcards...")
-      const flashcardsPrompt = `Generate ${questionCount} high-quality flashcards (Question and Answer format) from this content: ${text}. Format your response strictly as a JSON array: [{"question": "...", "answer": "..."}]`
-      const flashcardsResponse = await generateAIResponse([{ role: 'user', content: flashcardsPrompt }])
-      
-      const flashcardsData = extractJSON(flashcardsResponse)
-      if (Array.isArray(flashcardsData)) {
-        await supabase.from('flashcards').insert(
-          flashcardsData.map((f: any) => ({
-            document_id: doc.id,
-            user_id: user?.id,
-            question: f.question,
-            answer: f.answer
-          }))
-        )
+      try {
+        const flashcardsPrompt = `Generate ${questionCount} high-quality flashcards (Question and Answer format) from this content: ${text}. Format your response strictly as a JSON array: [{"question": "...", "answer": "..."}]`
+        const flashcardsResponse = await generateAIResponse([{ role: 'user', content: flashcardsPrompt }])
+        
+        const flashcardsData = extractJSON(flashcardsResponse)
+        if (Array.isArray(flashcardsData)) {
+          const { error: fError } = await supabase.from('flashcards').insert(
+            flashcardsData.map((f: any) => ({
+              document_id: doc.id,
+              user_id: user?.id,
+              question: f.question,
+              answer: f.answer
+            }))
+          )
+          if (fError) console.error("Flashcard insert error:", fError)
+        }
+      } catch (e) {
+        console.error("Flashcard generation failed:", e)
       }
 
       setStatus("Generating Quizzes...")
-      const quizPrompt = `Generate a ${questionCount}-question multiple choice quiz with ${difficulty.toUpperCase()} difficulty level from this content: ${text}. Format your response strictly as a JSON array: [{"question": "...", "options": ["A", "B", "C", "D"], "correct": 0}]`
-      const quizResponse = await generateAIResponse([{ role: 'user', content: quizPrompt }])
+      try {
+        const quizPrompt = `Generate a ${questionCount}-question multiple choice quiz with ${difficulty.toUpperCase()} difficulty level from this content: ${text}. Format your response strictly as a JSON array: [{"question": "...", "options": ["A", "B", "C", "D"], "correct": 0}]`
+        const quizResponse = await generateAIResponse([{ role: 'user', content: quizPrompt }])
 
-      const quizData = extractJSON(quizResponse)
-      if (Array.isArray(quizData)) {
-        await supabase.from('quizzes').insert({
-          document_id: doc.id,
-          user_id: user?.id,
-          title: `Quiz: ${doc.title}`,
-          questions: quizData
-        })
+        const quizData = extractJSON(quizResponse)
+        if (Array.isArray(quizData)) {
+          const { error: qError } = await supabase.from('quizzes').insert({
+            document_id: doc.id,
+            user_id: user?.id,
+            title: `Quiz: ${doc.title}`,
+            questions: quizData
+          })
+          if (qError) console.error("Quiz insert error:", qError)
+        }
+      } catch (e) {
+        console.error("Quiz generation failed:", e)
       }
 
       setStatus("Generating Mind Map...")
-      const mindMapPrompt = `Generate a mind map from this content: ${text}. Format your response strictly as a JSON object with "nodes" and "edges". 
-      Nodes should be: {"id": "1", "position": {"x": 250, "y": 0}, "data": {"label": "Topic"}, "type": "input"}
-      Edges should be: {"id": "e1-2", "source": "1", "target": "2"}
-      Provide at least 5 nodes with logical coordinates (spacing them out).`
-      const mindMapResponse = await generateAIResponse([{ role: 'user', content: mindMapPrompt }])
-      
-      const mindMapData = extractJSON(mindMapResponse)
-      if (mindMapData && mindMapData.nodes) {
-        await supabase.from('mind_maps').insert({
-          document_id: doc.id,
-          user_id: user?.id,
-          flow_data: mindMapData
-        })
+      try {
+        const mindMapPrompt = `Generate a mind map from this content: ${text}. Format your response strictly as a JSON object with "nodes" and "edges". 
+        Nodes should be: {"id": "1", "position": {"x": 250, "y": 0}, "data": {"label": "Topic"}, "type": "input"}
+        Edges should be: {"id": "e1-2", "source": "1", "target": "2"}
+        Provide at least 5 nodes with logical coordinates.`
+        const mindMapResponse = await generateAIResponse([{ role: 'user', content: mindMapPrompt }])
+        
+        const mindMapData = extractJSON(mindMapResponse)
+        if (mindMapData && mindMapData.nodes) {
+          const { error: mError } = await supabase.from('mind_maps').insert({
+            document_id: doc.id,
+            user_id: user?.id,
+            flow_data: mindMapData
+          })
+          if (mError) console.error("Mind map insert error:", mError)
+        }
+      } catch (e) {
+        console.error("Mind map generation failed:", e)
       }
 
       toast({
         title: "Success!",
-        description: "Your study materials have been generated successfully.",
+        description: "Your study materials have been generated. Redirecting to your notes...",
       })
       
       setFile(null)
       setLink("")
+      setPastedText("")
+      setCustomInstructions("")
+      
+      // Short delay for the user to see the success state
+      setTimeout(() => {
+        navigate("/dashboard/notes")
+      }, 1500)
     } catch (error: any) {
       console.error("Upload error details:", error)
       toast({
         title: "Processing failed",
-        description: error.message,
+        description: error.message || "An unexpected error occurred.",
         variant: "destructive"
       })
     } finally {
@@ -223,62 +302,66 @@ export default function UploadCenter() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <div className="mb-10 text-center">
-        <h1 className="text-4xl font-black mb-4">Upload Center</h1>
+    <div className="max-w-4xl mx-auto py-4 md:py-6 px-4 md:px-0">
+      <div className="mb-6 md:mb-10 text-center">
+        <h1 className="text-3xl md:text-4xl font-black mb-2 md:mb-4">Upload Center</h1>
         <p className="text-muted-foreground text-lg">
           Upload your materials to instantly generate study guides.
         </p>
       </div>
 
       <Card className="border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-md">
-        <Tabs defaultValue="file" className="w-full">
-          <TabsList className="w-full grid grid-cols-2 h-16 bg-muted/50 rounded-none border-b">
-            <TabsTrigger value="file" className="text-lg font-bold data-[state=active]:bg-background data-[state=active]:text-primary gap-2">
-              <File size={18} />
-              PDF / Document
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full grid grid-cols-3 h-16 bg-muted/50 rounded-none border-b">
+            <TabsTrigger value="file" className="text-base md:text-lg font-bold data-[state=active]:bg-background data-[state=active]:text-primary gap-2">
+              <File size={18} className="shrink-0" />
+              <span>File</span>
             </TabsTrigger>
-            <TabsTrigger value="link" className="text-lg font-bold data-[state=active]:bg-background data-[state=active]:text-primary gap-2">
-              <LinkIcon size={18} />
-              Website / Video Link
+            <TabsTrigger value="link" className="text-base md:text-lg font-bold data-[state=active]:bg-background data-[state=active]:text-primary gap-2">
+              <LinkIcon size={18} className="shrink-0" />
+              <span>Link</span>
+            </TabsTrigger>
+            <TabsTrigger value="text" className="text-base md:text-lg font-bold data-[state=active]:bg-background data-[state=active]:text-primary gap-2">
+              <Type size={18} className="shrink-0" />
+              <span>Paste</span>
             </TabsTrigger>
           </TabsList>
           
-          <CardContent className="p-10">
+          <CardContent className="p-4 md:p-10">
             <TabsContent value="file" className="m-0">
-               <div 
-                 className={`relative border-2 border-dashed rounded-3xl p-12 transition-all duration-300 flex flex-col items-center justify-center gap-4 ${
-                   file ? 'border-primary bg-primary/5' : 'border-muted-foreground/20 hover:border-primary/50'
-                 }`}
-               >
-                  <input 
-                    type="file" 
-                    className="absolute inset-0 opacity-0 cursor-pointer" 
-                    onChange={handleFileChange}
-                    accept=".pdf,.docx,.txt"
-                  />
-                  <div className={`p-4 rounded-full ${file ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>
-                    <Upload size={32} />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xl font-bold">
-                      {file ? file.name : "Drag and drop your file here"}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      PDF, DOCX, or TXT up to 20MB
-                    </p>
-                  </div>
-               </div>
+                <div 
+                  className={`relative border-2 border-dashed rounded-3xl p-6 md:p-12 transition-all duration-300 flex flex-col items-center justify-center gap-4 ${
+                    file ? 'border-primary bg-primary/5' : 'border-muted-foreground/20 hover:border-primary/50'
+                  }`}
+                >
+                   <input 
+                     type="file" 
+                     className="absolute inset-0 opacity-0 cursor-pointer z-[100]" 
+                     onChange={handleFileChange}
+                     accept=".pdf,.docx,.txt"
+                   />
+                   <div className={`p-4 rounded-full ${file ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>
+                     <Upload size={32} />
+                   </div>
+                   <div className="text-center">
+                     <p className="text-lg md:text-xl font-bold">
+                       {file ? file.name : "Drag and drop your file here"}
+                     </p>
+                     <p className="text-sm text-muted-foreground mt-1">
+                       PDF, DOCX, or TXT up to 20MB
+                     </p>
+                   </div>
+                </div>
             </TabsContent>
 
             <TabsContent value="link" className="m-0">
                <div className="space-y-4">
-                  <Label htmlFor="url" className="text-lg font-bold">Enter URL</Label>
+                  <Label htmlFor="url" className="text-lg font-bold">Paste URL</Label>
                   <div className="relative">
                     <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
                     <Input 
                       id="url" 
-                      placeholder="https://example.com/study-material" 
+                      placeholder="e.g. https://en.wikipedia.org/wiki/Physics" 
                       className="pl-12 h-14 rounded-2xl text-lg border-muted-foreground/20"
                       value={link}
                       onChange={(e) => setLink(e.target.value)}
@@ -286,7 +369,23 @@ export default function UploadCenter() {
                   </div>
                   <p className="text-sm text-muted-foreground flex items-center gap-2">
                     <AlertCircle size={14} />
-                    We support YouTube, Wikipedia, and most educational blogs.
+                    Best for Wikipedia, educational blogs, and news articles.
+                  </p>
+               </div>
+            </TabsContent>
+
+            <TabsContent value="text" className="m-0">
+               <div className="space-y-4">
+                  <Label htmlFor="manual-text" className="text-lg font-bold">Paste Study Material</Label>
+                  <textarea 
+                    id="manual-text" 
+                    placeholder="Copy and paste text from your textbook, website, or notes here..." 
+                    className="w-full min-h-[200px] p-6 rounded-2xl text-lg border-2 border-muted-foreground/20 bg-background/50 focus:ring-2 ring-primary outline-none transition-all"
+                    value={pastedText}
+                    onChange={(e) => setPastedText(e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    This is the most reliable way if the link extraction fails.
                   </p>
                </div>
             </TabsContent>
@@ -310,7 +409,7 @@ export default function UploadCenter() {
                 <Label className="text-lg font-bold">Number of Questions/Flashcards</Label>
                 <span className="text-primary font-black text-xl">{questionCount}</span>
               </div>
-              <div className="flex gap-4 items-center">
+              <div className="flex flex-col gap-4">
                  <input 
                   type="range" 
                   min="5" 
@@ -318,9 +417,9 @@ export default function UploadCenter() {
                   step="5"
                   value={questionCount}
                   onChange={(e) => setQuestionCount(parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                  className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
                 />
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 justify-center">
                    {[5, 10, 20, 30, 50].map((n) => (
                      <Button
                       key={n}
@@ -341,7 +440,7 @@ export default function UploadCenter() {
 
             <div className="mt-8 space-y-4">
               <Label className="text-lg font-bold">Difficulty Level for Test</Label>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                  {[
                    { id: 'easy', label: 'Easy', color: 'border-green-500/20 text-green-600 bg-green-50' },
                    { id: 'medium', label: 'Medium', color: 'border-yellow-500/20 text-yellow-600 bg-yellow-50' },
@@ -352,7 +451,7 @@ export default function UploadCenter() {
                     type="button"
                     variant="outline"
                     onClick={() => setDifficulty(d.id as any)}
-                    className={`h-14 rounded-2xl border-2 font-bold transition-all ${
+                    className={`h-12 md:h-14 rounded-2xl border-2 font-bold transition-all ${
                       difficulty === d.id ? `${d.color} border-current ring-4 ring-current/5` : 'border-muted-foreground/10 opacity-60'
                     }`}
                    >
